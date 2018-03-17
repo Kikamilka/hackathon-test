@@ -15,6 +15,11 @@ class MyServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes("</body></html>", "utf-8"))
 
     def do_POST(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(bytes("ok", "utf-8"))
         print("xcvxcv")
 
 if __name__ == "__main__":

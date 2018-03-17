@@ -3,11 +3,8 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <title>Title</title>
-
 </head>
 
 <body>
@@ -17,79 +14,75 @@
 
 <img id="i" width="400" height="400"/>
 <script>
-var sendBase64 = function(data){
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", 'http://10.20.160.8:8080/image_drop', true);
+    var sendBase64 = function(data){
+        console.log('sending: ' + data.length);
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", 'http://localhost:9000/image_drop', true);
 
-    //Передает правильный заголовок в запросе
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        //Передает правильный заголовок в запросе
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
-    xhr.onreadystatechange = function() {//Вызывает функцию при смене состояния.
-        if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-            // Запрос завершен. Здесь можно обрабатывать результат.
-            console.log("upload finished")
+        xhr.onreadystatechange = function() {//Вызывает функцию при смене состояния.
+            if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+                // Запрос завершен. Здесь можно обрабатывать результат.
+                console.log("upload finished");
+            }
         }
-    }
 
-    xhr.send(data);
-    //xhr.send("foo=bar&lorem=ipsum");
-    // xhr.send('string');
-    // xhr.send(new Blob());
-    // xhr.send(new Int8Array());
-    // xhr.send({ form: 'data' });
-    // xhr.send(document);
-}
-
- var startCapture = function(){
-    console.log("start camera capture");
-
-    var timerId = setInterval(function() {
-      console.log( "capturing" );
-    }, 2000);
-
-    canvas.getContext("2d").drawImage(video, 0, 0, 300, 300, 0, 0, 300, 300);
-
-			var img = canvas.toDataURL("image/png");
-            image.src = img;
-            sendBase64(img);
-			alert("done");
-    //video
-
-
-
-    // через 5 сек остановить повторы
-    setTimeout(function() {
-      clearInterval(timerId);
-      console.log( 'stop capture' );
-    }, 5000);
-     };
-
-    var canvas = document.getElementById('c');
-    var video = document.getElementById('vid');
-    var image = document.getElementById('i');
-
-    video.style.width = document.width + 'px';
-    video.style.height = document.height + 'px';
-    video.setAttribute('autoplay', '');
-    video.setAttribute('muted', '');
-    video.setAttribute('playsinline', '');
-
-    var constraints = {
-        audio: false,
-        video: {
-        //environment
-        //user
-            facingMode: 'environment'
-        }
+        xhr.send(data);
     };
 
-    navigator.mediaDevices.getUserMedia(constraints).then(function success(stream) {
-        video.srcObject = stream;
-    });
+    var stopCapture = function(){
+        clearInterval(timerId);
+        console.log("camera capture stopped");
+    };
 
+    var singleCapture = function(){
+        console.log("capturing" );
+
+        canvas.getContext("2d").drawImage(video, 0, 0, 300, 300, 0, 0, 300, 300);
+
+        var img = canvas.toDataURL("image/png");
+        image.src = img;
+        return img;
+
+        //alert("done");
+        //video
+    };
+
+    var startCapture = function(){
+        console.log("start camera capture");
+
+        timerId = setInterval(function(){sendBase64(singleCapture());}, 1000);
+
+        
+    };
+
+    var canvas = document.getElementById('c');
+        var video = document.getElementById('vid');
+        var image = document.getElementById('i');
+
+        video.style.width = document.width + 'px';
+        video.style.height = document.height + 'px';
+        video.setAttribute('autoplay', '');
+        video.setAttribute('muted', '');
+        video.setAttribute('playsinline', '');
+
+        var constraints = {
+            audio: false,
+            video: {
+            //environment
+            //user
+                facingMode: 'environment'
+            }
+        };
+        navigator.mediaDevices.getUserMedia(constraints).then(function success(stream) {
+            video.srcObject = stream;
+        });
+        
 </script>
 <input type="button" name="start" value="start" onclick="startCapture();" >
-<input type="button" name="start" value="stop" onclick="startCapture();" >
+<input type="button" name="start" value="stop" onclick="stopCapture();" >
 </body>
 
 </html>
