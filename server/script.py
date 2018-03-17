@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import time
 
-hostName = "localhost"
+hostName = "0.0.0.0"
 hostPort = 9000
 
 class MyServer(BaseHTTPRequestHandler):
@@ -17,13 +17,14 @@ class MyServer(BaseHTTPRequestHandler):
     def do_POST(self):
         print("xcvxcv")
 
-myServer = HTTPServer((hostName, hostPort), MyServer)
-print(time.asctime(), "Server Starts - %s:%s" % (hostName, hostPort))
+if __name__ == "__main__":
+    myServer = HTTPServer((hostName, hostPort), MyServer)
+    print(time.asctime(), "Server Starts - %s:%s" % (hostName, hostPort))
 
-try:
-    myServer.serve_forever()
-except KeyboardInterrupt:
-    pass
+    try:
+        myServer.serve_forever()
+    except KeyboardInterrupt:
+        pass
 
-myServer.server_close()
-print(time.asctime(), "Server Stops - %s:%s" % (hostName, hostPort))
+    myServer.server_close()
+    print(time.asctime(), "Server Stops - %s:%s" % (hostName, hostPort))
