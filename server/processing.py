@@ -3,6 +3,7 @@ import math
 import json
 import statistics
 
+import pyclipper as pyclipper
 from plyfile import PlyData
 
 class Processing:
@@ -13,13 +14,27 @@ class Processing:
         call(["docker", "run", "-it", "-v", "./data:/data", "sfm"])
 
     def prune(self):
-        call(["docker", "run", "-it", "-v", "./data/images:/opt/images", "prune"])
+        call(["docker", "run", "-it", "-v", "./data:/data", "deeplab"])
         plydata = PlyData.read("data/depthmaps/merged.ply")
 
-        filename = ("data/reconstruction.json")
+        filename = "data/reconstruction.json"
         file = open(filename, "r")
         data = json.loads(file.read())
 
+        for f in data.files:
+            fdata = json.loads(open(f.name, "r").read())
+            pco = pyclipper.PyclipperOffset()
+            pco.AddPath(fdata.path)
+
+            elements = []
+            for element in plydata.elements:
+                dist = element.x * f.gps.nx + element.y * f.gps.ny + element.y * f.gps.nz
+                xm = element.x + (f.gps.x - element.x) / dist
+                ym = element.y + (f.gps.y - element.y) / dist
+                s = pco.Execute([xm, ym])
+                if len(s) > 0:
+                    elements.append(element)
+            plydata.elements = elements
 
         PlyData(plydata).write("pure.ply")
 
@@ -40,7 +55,7 @@ class Processing:
         def dist(a,b):
             math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2)
 
-        filename = ("./human/body.bin")
+        filename = "./human/body.bin"
         file = open(filename, "r")
         body = json.loads(file.read())
 
@@ -55,6 +70,7 @@ class Processing:
         return {waist: waist}
 
     def humanize(self):
+        call(["docker", "run", "-it", "-v", "./data:/data", "pose"])
 
     def run(self):
         self.make3D()
@@ -62,5 +78,3 @@ class Processing:
         self.normalize()
         self.humanize()
         self.calculate()
-
-

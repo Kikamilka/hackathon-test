@@ -11,7 +11,7 @@ RUN virtualenv env
 RUN pip install -r requirements.txt
 RUN python setup.py build
 
-ENTRYPOINT ["bin/opensfm_run_all","/data/"]
+ENTRYPOINT ["bin/opensfm_run_all","/data/images"]
 
 
 
