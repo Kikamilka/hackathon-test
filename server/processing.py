@@ -13,25 +13,34 @@ class Processing:
         call(["docker", "run", "-it", "-v", "./data:/data", "sfm"])
 
     def prune(self):
+        call(["docker", "run", "-it", "-v", "./data/images:/opt/images", "prune"])
+        plydata = PlyData.read("data/depthmaps/merged.ply")
+
+        filename = ("data/reconstruction.json")
+        file = open(filename, "r")
+        data = json.loads(file.read())
+
+
+        PlyData(plydata).write("pure.ply")
 
     def normalize(self):
-        plydata = PlyData.read("data/depthmaps/merged.ply")
+        plydata = PlyData.read("pure.ply")
         x = statistics.mean(map(lambda p: p.x, plydata.elements))
         y = statistics.mean(map(lambda p: p.y, plydata.elements))
-        z = statistics.mean(map(lambda p: p.z, plydata.elements))
+        z = sorted(map(lambda p: p.z, plydata.elements))[0]
 
         for element in plydata.elements:
             element.x = element.x - x
             element.y = element.y - y
             element.z = element.z - z
 
-        PlyData(plydata).write("normalized.ply")
+        PlyData(plydata).write("normalize.ply")
 
     def calculate(self):
         def dist(a,b):
             math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2)
 
-        filename = (".human/body.bin")
+        filename = ("./human/body.bin")
         file = open(filename, "r")
         body = json.loads(file.read())
 
