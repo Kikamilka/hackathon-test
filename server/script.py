@@ -2,6 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import time
 import base64
 import os
+import processing
 
 hostName = "0.0.0.0"
 hostPort = 9000
@@ -16,7 +17,7 @@ class MyServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes("<p>You accessed path: %s</p>" % self.path, "utf-8"))
         self.wfile.write(bytes("</body></html>", "utf-8"))
 
-    def do_POST(self):
+    def image_drop(self):
         content_len = int(self.headers.get('content-length', 0))
         print(content_len)
         data = self.rfile.read(content_len)
@@ -36,12 +37,25 @@ class MyServer(BaseHTTPRequestHandler):
         file.write(encoded)
         file.close()
 
+    def image_stop(self):
+        print("stop")
+        process = processing.Processing()
+        processing.run()
+
+
+    def do_POST(self):
+
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
-        self.wfile.write(bytes("ok", "utf-8"))
 
+        if self.path == "/image_drop":
+            self.image_drop()
+            self.wfile.write(bytes("ok", "utf-8"))
+        if self.path == "/image_stop":
+            res = self.image_stop()
+            self.wfile.write(res)
 
 if __name__ == "__main__":
     myServer = HTTPServer((hostName, hostPort), MyServer)

@@ -1,20 +1,37 @@
 from subprocess import call
 import math
 import json
+import statistics
+
+from plyfile import PlyData
 
 class Processing:
     def make3D(self):
-        call(["docker", "run", "-it", "-v", "/c/Users/the-a/data:/data", "sfm"])
+        call(["mkdir", "data"])
+        call(["mkdir", "data/images"])
+        call(["cp", "./imgages", "./data/images"])
+        call(["docker", "run", "-it", "-v", "./data:/data", "sfm"])
 
     def prune(self):
 
     def normalize(self):
+        plydata = PlyData.read("data/depthmaps/merged.ply")
+        x = statistics.mean(map(lambda p: p.x, plydata.elements))
+        y = statistics.mean(map(lambda p: p.y, plydata.elements))
+        z = statistics.mean(map(lambda p: p.z, plydata.elements))
+
+        for element in plydata.elements:
+            element.x = element.x - x
+            element.y = element.y - y
+            element.z = element.z - z
+
+        PlyData(plydata).write("normalized.ply")
 
     def calculate(self):
         def dist(a,b):
             math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2)
 
-        filename = ("c:\\Users\\the-a\\body.bin")
+        filename = (".human/body.bin")
         file = open(filename, "r")
         body = json.loads(file.read())
 
